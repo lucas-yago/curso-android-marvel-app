@@ -5,19 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.core.domain.model.Character
-import com.example.marvelapp.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.marvelapp.databinding.FragmentCharactersBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CharactersFragment : Fragment() {
 
-
     private var _binding: FragmentCharactersBinding? = null
     private val binding : FragmentCharactersBinding get() = _binding!!
+    private val viewModel: CharactersViewModel by viewModels()
     private val charactersAdapter = CharactersAdapter()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,18 +30,11 @@ class CharactersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initCharactersAdapter()
 
-        charactersAdapter.submitList(
-            listOf(
-                Character("3-D Man 1º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 2º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 3º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 4º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 5º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 6º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"),
-                Character("3-D Man 7º","https://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg")
-            )
-        )
-
+        lifecycleScope.launch {
+            viewModel.getCharactersPagingData("").collect{ pagingData->
+                charactersAdapter.submitData(pagingData)
+            }
+        }
     }
 
     private fun initCharactersAdapter(){
@@ -50,5 +43,4 @@ class CharactersFragment : Fragment() {
             adapter = charactersAdapter
         }
     }
-
 }
